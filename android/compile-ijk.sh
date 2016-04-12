@@ -24,7 +24,7 @@ fi
 REQUEST_TARGET=$1
 REQUEST_SUB_CMD=$2
 ACT_ABI_32="armv5 armv7a x86"
-ACT_ABI_64="armv5 armv7a x86 arm64"
+ACT_ABI_64="armv5 armv7a x86 arm64 x86_64"
 ACT_ABI_ALL=$ALL_ABI_64
 
 FF_MAKEFLAGS=
