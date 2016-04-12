@@ -380,8 +380,14 @@ static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, AVFrame *frame, AVSub
             do {
                 if (d->queue->nb_packets == 0)
                     SDL_CondSignal(d->empty_queue_cond);
-                if (packet_queue_get_or_buffering(ffp, d->queue, &pkt, &d->pkt_serial, &d->finished) < 0)
+
+                #ifdef USE_IJK_BUFERING
+                    if (packet_queue_get_or_buffering(ffp, d->queue, &pkt, &d->pkt_serial, &d->finished) < 0)
+                #else
+                    if (packet_queue_get(d->queue, &pkt, 1, &d->pkt_serial) < 0)
+                #endif
                     return -1;
+
                 if (pkt.data == flush_pkt.data) {
                     avcodec_flush_buffers(d->avctx);
                     d->finished = 0;
@@ -2869,11 +2875,13 @@ static int read_thread(void *arg)
         }
 
         if (ffp->packet_buffering) {
-            io_tick_counter = SDL_GetTickHR();
-            if (abs((int)(io_tick_counter - prev_io_tick_counter)) > BUFFERING_CHECK_PER_MILLISECONDS) {
-                prev_io_tick_counter = io_tick_counter;
-                ffp_check_buffering_l(ffp);
-            }
+            #ifdef USE_IJK_BUFERING
+                 io_tick_counter = SDL_GetTickHR();
+                 if (abs((int)(io_tick_counter - prev_io_tick_counter)) > BUFFERING_CHECK_PER_MILLISECONDS) {
+                     prev_io_tick_counter = io_tick_counter;
+                     ffp_check_buffering_l(ffp);
+                 }
+            #endif
         }
     }
 

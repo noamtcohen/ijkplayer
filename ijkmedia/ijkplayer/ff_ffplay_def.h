@@ -63,27 +63,36 @@
 #include "ff_ffpipenode.h"
 #include "ijkmeta.h"
 
-#define DEFAULT_HIGH_WATER_MARK_IN_BYTES        (256 * 1024)
+#ifdef USE_IJK_BUFERING
+    #define DEFAULT_HIGH_WATER_MARK_IN_BYTES        (256 * 1024)
 
-/*
- * START: buffering after prepared/seeked
- * NEXT:  buffering for the second time after START
- * MAX:   ...
- */
-#define DEFAULT_START_HIGH_WATER_MARK_IN_MS     (100)
-#define DEFAULT_NEXT_HIGH_WATER_MARK_IN_MS      (1 * 1000)
-#define DEFAULT_MAX_HIGH_WATER_MARK_IN_MS       (5 * 1000)
+    /*
+     * START: buffering after prepared/seeked
+     * NEXT:  buffering for the second time after START
+     * MAX:   ...
+     */
+    #define DEFAULT_START_HIGH_WATER_MARK_IN_MS     (100)
+    #define DEFAULT_NEXT_HIGH_WATER_MARK_IN_MS      (1 * 1000)
+    #define DEFAULT_MAX_HIGH_WATER_MARK_IN_MS       (5 * 1000)
 
-#define BUFFERING_CHECK_PER_BYTES               (512)
-#define BUFFERING_CHECK_PER_MILLISECONDS        (500)
+    #define BUFFERING_CHECK_PER_BYTES               (512)
+    #define BUFFERING_CHECK_PER_MILLISECONDS        (500)
 
-#define MAX_QUEUE_SIZE (15 * 1024 * 1024)
-#ifdef FFP_MERGE
-#define MIN_FRAMES 25
+    #define MAX_QUEUE_SIZE (15 * 1024 * 1024)
+    #ifdef FFP_MERGE
+    #define MIN_FRAMES 25
+    #endif
+    #define DEFAULT_MIN_FRAMES  5
+    #define MIN_MIN_FRAMES      5
+    #define MAX_MIN_FRAMES      50000
+#else
+    #define MAX_QUEUE_SIZE (15 * 1024 * 1024)
+    #define DEFAULT_MIN_FRAMES  5
+    #define MIN_MIN_FRAMES      5
+
+    #define MAX_MIN_FRAMES 5
 #endif
-#define DEFAULT_MIN_FRAMES  50000
-#define MIN_MIN_FRAMES      5
-#define MAX_MIN_FRAMES      50000
+
 #define MIN_FRAMES (ffp->min_frames)
 #define EXTERNAL_CLOCK_MIN_FRAMES 2
 #define EXTERNAL_CLOCK_MAX_FRAMES 10
@@ -672,13 +681,15 @@ inline static void ffp_reset_internal(FFPlayer *ffp)
 
     ffp->min_frames                     = DEFAULT_MIN_FRAMES;
     ffp->max_buffer_size                = MAX_QUEUE_SIZE;
-    ffp->high_water_mark_in_bytes       = DEFAULT_HIGH_WATER_MARK_IN_BYTES;
 
-    ffp->start_high_water_mark_in_ms    = DEFAULT_START_HIGH_WATER_MARK_IN_MS;
-    ffp->next_high_water_mark_in_ms     = DEFAULT_NEXT_HIGH_WATER_MARK_IN_MS;
-    ffp->max_high_water_mark_in_ms      = DEFAULT_MAX_HIGH_WATER_MARK_IN_MS;
-    ffp->current_high_water_mark_in_ms  = DEFAULT_START_HIGH_WATER_MARK_IN_MS;
+    #ifdef USE_IJK_BUFERING
+        ffp->high_water_mark_in_bytes       = DEFAULT_HIGH_WATER_MARK_IN_BYTES;
 
+        ffp->start_high_water_mark_in_ms    = DEFAULT_START_HIGH_WATER_MARK_IN_MS;
+        ffp->next_high_water_mark_in_ms     = DEFAULT_NEXT_HIGH_WATER_MARK_IN_MS;
+        ffp->max_high_water_mark_in_ms      = DEFAULT_MAX_HIGH_WATER_MARK_IN_MS;
+        ffp->current_high_water_mark_in_ms  = DEFAULT_START_HIGH_WATER_MARK_IN_MS;
+     #endif
     ffp->playable_duration_ms           = 0;
 
     ffp->packet_buffering               = 1;
