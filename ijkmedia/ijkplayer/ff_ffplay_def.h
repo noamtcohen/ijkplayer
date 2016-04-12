@@ -81,8 +81,13 @@
 // #ifdef FFP_MERGE
 // #define MIN_FRAMES 25
 
+#define DEFAULT_HIGH_WATER_MARK_IN_BYTES        (256 * 1024)
+#define DEFAULT_FIRST_HIGH_WATER_MARK_IN_MS     (100)
+#define DEFAULT_NEXT_HIGH_WATER_MARK_IN_MS      (1 * 1000)
+#define DEFAULT_LAST_HIGH_WATER_MARK_IN_MS      (5 * 1000)
+
 #ifdef USE_IJK_BUFERING
-    #define DEFAULT_HIGH_WATER_MARK_IN_BYTES        (256 * 1024)
+    
 
     /*
      * START: buffering after prepared/seeked
